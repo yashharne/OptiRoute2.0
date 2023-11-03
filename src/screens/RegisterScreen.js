@@ -72,6 +72,7 @@ export default function RegisterScreen({ navigation }) {
         mode="contained"
         onPress={onSignUpPressed}
         style={{ marginTop: 24 }}
+        textcolor={"#ffffff"}
       >
         Sign Up
       </Button>
