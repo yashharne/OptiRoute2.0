@@ -1,14 +1,22 @@
 import React from "react";
-import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Polyline } from "react-native-maps";
 
-const PathMapView = ({ origin, destination, intermediatePoints }) => {
+const PathMapView = ({ route }) => {
+  const { origin, destination, intermediatePoints } = route.params;
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <MapView
         style={{ flex: 1 }}
         showsUserLocation={true}
         followsUserLocation={true}
+        initialRegion={{
+          // Set the initial region to center at the origin
+          latitude: origin.latitude,
+          longitude: origin.longitude,
+          latitudeDelta: 0.008,
+          longitudeDelta: 0.008,
+        }}
       >
         <Marker coordinate={origin} title="Origin" />
         <Marker coordinate={destination} title="Destination" />
@@ -28,7 +36,7 @@ const PathMapView = ({ origin, destination, intermediatePoints }) => {
           strokeColor="blue"
         />
       </MapView>
-    </View>
+    </SafeAreaView>
   );
 };
 

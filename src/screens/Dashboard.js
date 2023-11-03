@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as Location from "expo-location";
-import { TextInput, FlatList, Text, View } from "react-native";
+import { TextInput, FlatList, Text, View, Linking } from "react-native";
 import Background from "../components/Background";
 import Header from "../components/Header";
 import ItemListItem from "../components/ItemListItem";
@@ -10,9 +10,14 @@ import Button from "../components/Button";
 export default function Dashboard({ navigation }) {
   const [item, setItem] = useState("");
   const [itemsList, setItemsList] = useState([]);
-  const [clearList, setClearList] = useState(false);
+  // const [clearList, setClearList] = useState(false);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  const intermediatePoints = [
+    { latitude: 18.462479201186422, longitude: 73.83214922869587 }, // gaming cafe
+    { latitude: 18.465359165007385, longitude: 73.83478852247687 }, // polyhub
+  ];
 
   useEffect(() => {
     (async () => {
@@ -51,16 +56,40 @@ export default function Dashboard({ navigation }) {
     setClearList(true);
   };
 
-  const findPath = () => {
+  const givePathOverview = () => {
     const origin = location.coords;
-    const destination = { latitude: 37.7948605, longitude: -122.4596065 };
-    const intermediatePoints = [];
+    const destination = {
+      // College
+      latitude: 18.46313753807985,
+      longitude: 73.83434475316888,
+    };
 
     navigation.navigate("MapView", {
       origin,
       destination,
       intermediatePoints,
     });
+  };
+
+  const giveGoogleMapsPath = () => {
+    const origin = location.coords;
+    const destination = {
+      // College
+      latitude: 18.46313753807985,
+      longitude: 73.83434475316888,
+    };
+
+    const originStr = `${origin.latitude},${origin.longitude}`;
+    const destinationStr = `${destination.latitude},${destination.longitude}`;
+    const waypointsStr = intermediatePoints
+      .map((point) => `${point.latitude},${point.longitude}`)
+      .join("|");
+
+    const googleMapsURL = `https://www.google.com/maps/dir/?api=1&origin=${originStr}&destination=${destinationStr}&waypoints=${waypointsStr}`;
+
+    Linking.openURL(googleMapsURL).catch((err) =>
+      console.error("An error occurred: ", err)
+    );
   };
 
   return (
@@ -149,8 +178,11 @@ export default function Dashboard({ navigation }) {
 
       {/* {clearList && <Text>List has been cleared.</Text>} */}
 
-      <Button mode="outlined" bgcolor="#cce8dc" onPress={findPath}>
-        Find Path
+      <Button mode="outlined" bgcolor="#cce8dc" onPress={givePathOverview}>
+        Get Path Overview
+      </Button>
+      <Button mode="outlined" bgcolor="#cce8dc" onPress={giveGoogleMapsPath}>
+        Start Navigation
       </Button>
     </Background>
   );
