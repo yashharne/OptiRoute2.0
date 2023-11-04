@@ -16,7 +16,7 @@ const ItemListItem = ({ item, onClearItem }) => {
 const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: "row", // Display elements in the same row
-    backgroundColor: "#c6b2db",
+    backgroundColor: "#afc3de",
     // width: "75%",
     marginVertical: 5,
     borderRadius: 5,

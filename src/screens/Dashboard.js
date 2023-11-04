@@ -9,6 +9,7 @@ import Button from "../components/Button";
 import RNPickerSelect from "react-native-picker-select";
 import itemData from "../components/ItemData";
 import { useToast } from "react-native-toast-notifications";
+import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
 export default function Dashboard({ navigation }) {
   const [item, setItem] = useState("");
@@ -23,27 +24,6 @@ export default function Dashboard({ navigation }) {
     { latitude: 18.462479201186422, longitude: 73.83214922869587 }, // gaming cafe
     { latitude: 18.465359165007385, longitude: 73.83478852247687 }, // polyhub
   ];
-
-  // const Component = () => {
-  //   const toast = useToast();
-
-  //   useEffect(() => {
-  //     toast.show("Hello World");
-  //   }, []);
-  // };
-
-  // useEffect(() => {
-  //   (async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       setErrorMsg("Permission to access location was denied");
-  //       return;
-  //     }
-
-  //     let location = await Location.getCurrentPositionAsync({});
-  //     setLocation(location);
-  //   })();
-  // }, []);
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -70,16 +50,14 @@ export default function Dashboard({ navigation }) {
       }
     };
 
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error("Location request timeout"));
-      }, 5000); // Adjust the timeout duration (in milliseconds) as needed
-    });
+    // const timeoutPromise = new Promise((_, reject) => {
+    //   setTimeout(() => {
+    //     reject(new Error("Location request timeout"));
+    //   }, 100000); // Adjust the timeout duration (in milliseconds) as needed
+    // });
 
-    Promise.race([fetchLocation(), timeoutPromise]).catch((error) => {
-      // Handle timeout or other errors here
+    Promise.race([fetchLocation()]).catch((error) => {
       console.error(error);
-      // Navigate to the login screen or take appropriate action
       navigation.reset({
         index: 0,
         routes: [{ name: "LoginScreen" }],
@@ -87,27 +65,23 @@ export default function Dashboard({ navigation }) {
     });
   }, []);
 
-  // let locationtext = "Waiting..";
-  // if (errorMsg) {
-  //   locationtext = errorMsg;
-  // } else if (location) {
-  //   locationtext = JSON.stringify(location);
-  // }
-
   const itemsData = itemData;
 
   const addItem = () => {
     if (selectedItem && !itemsList.includes(selectedItem)) {
       setItemsList([...itemsList, selectedItem]);
     } else if (itemsList.includes(selectedItem)) {
-      // Display a message or take any other action
-      toast.show("Item already added!", {
-        type: "custom",
-        placement: "bottom",
-        duration: 4000,
-        offset: 30,
-        animationType: "slide-in",
+      Toast.show({
+        type: "alreadyAddedToast",
+        text1: "Item already added!",
       });
+      // toast.show("Item already added!", {
+      //   type: "custom",
+      //   placement: "bottom",
+      //   duration: 4000,
+      //   offset: 30,
+      //   animationType: "zoom-in",
+      // });
     }
   };
 
@@ -184,7 +158,7 @@ export default function Dashboard({ navigation }) {
             mode="outlined"
             style={{
               width: 100,
-              backgroundColor: "#dbabaf",
+              backgroundColor: "#8282a8",
             }}
             onPress={() =>
               navigation.reset({
@@ -192,7 +166,7 @@ export default function Dashboard({ navigation }) {
                 routes: [{ name: "StartScreen" }],
               })
             }
-            textcolor={"black"}
+            textcolor={"white"}
           >
             Logout
           </Button>
@@ -200,7 +174,7 @@ export default function Dashboard({ navigation }) {
       </Header>
 
       <Header>Let’s start</Header>
-      <Paragraph>Input items you want to shop!</Paragraph>
+      <Paragraph>Input items you want to buy!</Paragraph>
 
       <RNPickerSelect
         placeholder={{
@@ -229,20 +203,6 @@ export default function Dashboard({ navigation }) {
         }}
       />
 
-      {/* <TextInput
-        placeholder="Add an item"
-        value={item}
-        onChangeText={(text) => setItem(text)}
-        onSubmitEditing={addItem}
-        style={{
-          backgroundColor: "#e8e3e3",
-          borderRadius: 10,
-          textAlign: "center",
-          width: "75%",
-          padding: 10,
-        }}
-      /> */}
-
       <Button
         mode="outlined"
         bgcolor="#c9bdbd"
@@ -252,24 +212,12 @@ export default function Dashboard({ navigation }) {
         Add Item
       </Button>
 
-      {/* <Button mode="outlined" bgcolor="#dbd7d7" onPress={clearItems}>
-        {locationtext}
-      </Button> */}
-
       <FlatList
         data={itemsList}
         renderItem={({ item }) => (
           <ItemListItem item={item} onClearItem={clearItem} />
         )}
       />
-
-      {/* {itemsList.length > 0 && (
-        <Button mode="outlined" onPress={clearItems}>
-          Clear
-        </Button>
-      )} */}
-
-      {/* {clearList && <Text>List has been cleared.</Text>} */}
 
       {location ? (
         <View style={{ width: 300 }}>

@@ -10,27 +10,11 @@ import BackButton from "../components/BackButton";
 import { theme } from "../core/theme";
 import { emailValidator } from "../helpers/emailValidator";
 import { passwordValidator } from "../helpers/passwordValidator";
-import Geolocation from "react-native-geolocation-service";
-
-// ...
+import Toast from "react-native-toast-message";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
-
-  // const onLoginPressed = () => {
-  //   const emailError = emailValidator(email.value);
-  //   const passwordError = passwordValidator(password.value);
-  //   if (emailError || passwordError) {
-  //     setEmail({ ...email, error: emailError });
-  //     setPassword({ ...password, error: passwordError });
-  //     return;
-  //   }
-  //   navigation.reset({
-  //     index: 0,
-  //     routes: [{ name: "Dashboard" }],
-  //   });
-  // };
 
   const onLoginPressed = () => {
     const emailError = emailValidator(email.value);
@@ -49,45 +33,10 @@ export default function LoginScreen({ navigation }) {
         },
       ],
     });
-
-    // Request the user's location
-    // Geolocation.getCurrentPosition(
-    //   (position) => {
-    //     // Get the latitude and longitude from the position
-    //     const { latitude, longitude } = position.coords;
-
-    //     // Navigate to the "Dashboard" screen while passing user location
-    //     navigation.reset({
-    //       index: 0,
-    //       routes: [
-    //         {
-    //           name: "Dashboard",
-    //           params: {
-    //             userLocation: { latitude, longitude },
-    //           },
-    //         },
-    //       ],
-    //     });
-    //     // navigation.navigate("Dashboard", { userLocation });
-    //   },
-    //   (error) => {
-    //     // Handle location request error here
-    //     console.log("Location request error: ", error);
-    //     // You may choose to navigate to the "Dashboard" without location
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [
-    //     {
-    //       name: "Dashboard",
-    //       params: {
-    //         userLocation: null, // Pass null when location request fails
-    //       },
-    //     },
-    //   ],
-    // });
-    //   },
-    //   { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    // );
+    Toast.show({
+      type: "startToast",
+      text1: "Hello, Welcome to OptiRoute! 👋",
+    });
   };
 
   return (
