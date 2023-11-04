@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 25,
+    gap: 40,
     alignItems: "center",
     padding: 10,
   },

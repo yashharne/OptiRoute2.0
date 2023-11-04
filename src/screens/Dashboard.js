@@ -6,30 +6,85 @@ import Header from "../components/Header";
 import ItemListItem from "../components/ItemListItem";
 import Paragraph from "../components/Paragraph";
 import Button from "../components/Button";
+import RNPickerSelect from "react-native-picker-select";
+import itemData from "../components/ItemData";
+import { useToast } from "react-native-toast-notifications";
 
 export default function Dashboard({ navigation }) {
   const [item, setItem] = useState("");
   const [itemsList, setItemsList] = useState([]);
-  // const [clearList, setClearList] = useState(false);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const toast = useToast();
 
   const intermediatePoints = [
     { latitude: 18.462479201186422, longitude: 73.83214922869587 }, // gaming cafe
     { latitude: 18.465359165007385, longitude: 73.83478852247687 }, // polyhub
   ];
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
+  // const Component = () => {
+  //   const toast = useToast();
 
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    })();
+  //   useEffect(() => {
+  //     toast.show("Hello World");
+  //   }, []);
+  // };
+
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       setErrorMsg("Permission to access location was denied");
+  //       return;
+  //     }
+
+  //     let location = await Location.getCurrentPositionAsync({});
+  //     setLocation(location);
+  //   })();
+  // }, []);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location);
+        toast.show("Location is available!", {
+          type: "custom",
+          placement: "bottom",
+          duration: 5000,
+          offset: 30,
+          animationType: "slide-in",
+        });
+      } catch (error) {
+        // Handle any errors that occur during location fetching
+        console.error("Location request error: ", error);
+        setErrorMsg("Failed to fetch location.");
+      }
+    };
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error("Location request timeout"));
+      }, 5000); // Adjust the timeout duration (in milliseconds) as needed
+    });
+
+    Promise.race([fetchLocation(), timeoutPromise]).catch((error) => {
+      // Handle timeout or other errors here
+      console.error(error);
+      // Navigate to the login screen or take appropriate action
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "LoginScreen" }],
+      });
+    });
   }, []);
 
   // let locationtext = "Waiting..";
@@ -39,10 +94,20 @@ export default function Dashboard({ navigation }) {
   //   locationtext = JSON.stringify(location);
   // }
 
+  const itemsData = itemData;
+
   const addItem = () => {
-    if (item.trim() !== "") {
-      setItemsList([...itemsList, item]);
-      setItem("");
+    if (selectedItem && !itemsList.includes(selectedItem)) {
+      setItemsList([...itemsList, selectedItem]);
+    } else if (itemsList.includes(selectedItem)) {
+      // Display a message or take any other action
+      toast.show("Item already added!", {
+        type: "custom",
+        placement: "bottom",
+        duration: 4000,
+        offset: 30,
+        animationType: "slide-in",
+      });
     }
   };
 
@@ -136,7 +201,35 @@ export default function Dashboard({ navigation }) {
 
       <Header>Let’s start</Header>
       <Paragraph>Input items you want to shop!</Paragraph>
-      <TextInput
+
+      <RNPickerSelect
+        placeholder={{
+          label: "Select an item to add",
+          value: null,
+        }}
+        onValueChange={(value) => setSelectedItem(value)}
+        items={itemData}
+        value={selectedItem}
+        style={{
+          inputIOS: {
+            textAlign: "center",
+            fontSize: 16,
+            color: "blue",
+            backgroundColor: "lightgray",
+          },
+          inputAndroid: {
+            textAlign: "center",
+            fontSize: 16,
+            color: "#4c4c4d",
+            backgroundColor: "lightgray",
+          },
+          placeholder: {
+            color: "gray",
+          },
+        }}
+      />
+
+      {/* <TextInput
         placeholder="Add an item"
         value={item}
         onChangeText={(text) => setItem(text)}
@@ -148,7 +241,7 @@ export default function Dashboard({ navigation }) {
           width: "75%",
           padding: 10,
         }}
-      />
+      /> */}
 
       <Button
         mode="outlined"
@@ -178,12 +271,22 @@ export default function Dashboard({ navigation }) {
 
       {/* {clearList && <Text>List has been cleared.</Text>} */}
 
-      <Button mode="outlined" bgcolor="#cce8dc" onPress={givePathOverview}>
-        Get Path Overview
-      </Button>
-      <Button mode="outlined" bgcolor="#cce8dc" onPress={giveGoogleMapsPath}>
-        Start Navigation
-      </Button>
+      {location ? (
+        <View style={{ width: 300 }}>
+          <Button mode="outlined" bgcolor="#cce8dc" onPress={givePathOverview}>
+            Get Path Overview
+          </Button>
+          <Button
+            mode="outlined"
+            bgcolor="#cce8dc"
+            onPress={giveGoogleMapsPath}
+          >
+            Start Navigation
+          </Button>
+        </View>
+      ) : (
+        <Button>Location information is not available!</Button>
+      )}
     </Background>
   );
 }
