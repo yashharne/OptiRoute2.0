@@ -1,5 +1,21 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# Ignore virtual environment
+venv/
+
+# VS Code project files (includes Pylance cache and settings)
+.vscode/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment files
+.env
+.env.*
+
+
 # dependencies
 node_modules/
 

@@ -1,0 +1,21 @@
+[project]
+name = "server"
+version = "1.0.0"
+description = "Backend server handling authentication, app logic, and database interaction using Flask and Supabase."
+dependencies = [
+    "flask",
+    "supabase",
+    "flask-cors",
+    "pandas"
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["server"]
