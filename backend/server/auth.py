@@ -9,29 +9,50 @@ from server.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/register', methods=(['POST']))
+@bp.route('/register', methods=['POST'])
 def register():
-        email = request.form['email']
-        name = request.form['name']
-        password = request.form['password']
+    email = request.form['email']
+    name = request.form['name']
+    password = request.form['password']
 
-        db = get_db()
-        error = None
+    db = get_db()
+    error = None
 
-        if not email:
-            error = 'email is required.'
-        elif not password:
-            error = 'Password is required.'
+    # Check if email and password are provided
+    if not email:
+        error = 'Email is required.'
+    elif not password:
+        error = 'Password is required.'
 
-        if error is None:
-            try:
-                res = db.table("btp_user").insert({'email':email , 'name':name , 'password':generate_password_hash(password) }).execute()
-                return jsonify(res.data)
-            except:
-                error = f"User {email} is already registered."
-                return Response(error, status=401)
-        else:
-            return Response(error, status=401)
+    if error is None:
+        # Check if the email already exists in the database
+        existing_user = db.table('users').select('*').eq('email', email).execute().data
+        
+        # If the user exists, return an error
+        if existing_user:
+            error = f"User with email {email} is already registered."
+            return Response(error, status=400)  # 400 Bad Request for already existing user
+
+        try:
+            # Insert new user into the database
+            res = db.table("users").insert({
+                'email': email,
+                'name': name,
+                'password': generate_password_hash(password)
+            }).execute()
+
+            # Check if the insert was successful
+            if res.data:
+                return jsonify(res.data), 201  # Return success response with inserted data
+
+        except Exception as e:
+            # Catch any exceptions during the insert
+            error = f"An error occurred: {str(e)}"
+            return Response(error, status=500)  # 500 Internal Server Error
+
+    else:
+        return Response(error, status=400)  # 400 Bad Request for invalid input
+
 
 
 
@@ -44,7 +65,7 @@ def login():
         db = get_db()
         error = None
 
-        user = db.table('btp_user').select('*').eq('email' , email).execute().data[0]
+        user = db.table("users").select('*').eq('email' , email).execute().data[0]
 
         if user is None:
             error = 'Incorrect email.'
@@ -68,7 +89,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = db.table('btp_user').select('*').eq('id' , user_id).execute().data[0]
+        g.user = db.table("users").select('*').eq('id' , user_id).execute().data[0]
 
 
 

@@ -8,7 +8,7 @@ from supabase import create_client, Client
 def get_db():
     if 'db' not in g:
         url = os.environ.get('DATABASE_URL')
-        key = os.environ.get('API_KEY')
+        key = os.environ.get('API_SERVICE_ROLE_KEY')
         g.db = create_client(url, key)
         # g.db.row_factory = sqlite3.Row
 
