@@ -6,3 +6,4 @@ mysql-connector-python==8.0.31
 requests==2.32.3
 python-dotenv==1.1.0
 pytest==8.3.5
+supabase==2.15.0
