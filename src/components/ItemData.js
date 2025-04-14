@@ -9,21 +9,6 @@ const itemData = [
   { label: "Soft drinks", value: "Soft drinks" },
   { label: "Flour", value: "Flour" },
   { label: "Lentils", value: "Lentils" },
-  { label: "Tea", value: "Tea" },
-  { label: "Coffee", value: "Coffee" },
-  { label: "Butter", value: "Butter" },
-  { label: "Cheese", value: "Cheese" },
-  { label: "Tomatoes", value: "Tomatoes" },
-  { label: "Potatoes", value: "Potatoes" },
-  { label: "Onions", value: "Onions" },
-  { label: "Bananas", value: "Bananas" },
-  { label: "Apples", value: "Apples" },
-  { label: "Biscuits", value: "Biscuits" },
-  { label: "Chips", value: "Chips" },
-  { label: "Ketchup", value: "Ketchup" },
-  { label: "Cooking Oil", value: "Cooking Oil" },
-  { label: "Salt", value: "Salt" },
-  { label: "Pepper", value: "Pepper" },
 ];
 
 export default itemData;

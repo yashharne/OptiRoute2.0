@@ -89,40 +89,65 @@ export default function Dashboard({ navigation }) {
     setItemsList(updatedItems);
   };
 
-  const getRoute = async () => {
+  const getPlan = async () => {
     try {
-      // Send a POST request to the Flask API's login route
-      console.log(location);
-
       const response = await axios.post(`${apiUrl}/route`, {
         items: itemsList.map((item) => item.toLowerCase()),
         start_lat: location.coords.latitude,
         start_lon: location.coords.longitude,
       });
 
-      const filteredResponse = response.data.filter(
-        (item) => item.Item !== "Start"
+      const shopItemMap = response.data.shop_item_map;
+
+      // Convert it into a shopping plan
+      const shoppingPlan = {};
+
+      Object.entries(shopItemMap).forEach(([shop, itemList]) => {
+        shoppingPlan[shop] = itemList.map((entry) => ({
+          item: entry.item,
+          cost: entry.cost,
+        }));
+      });
+
+      console.log("Shopping Plan:", shoppingPlan);
+      return shoppingPlan;
+    } catch (error) {
+      console.error("Error generating shopping plan:", error);
+    }
+  };
+
+  const getRoute = async () => {
+    try {
+      const response = await axios.post(`${apiUrl}/route`, {
+        items: itemsList.map((item) => item.toLowerCase()),
+        start_lat: location.coords.latitude,
+        start_lon: location.coords.longitude,
+      });
+
+      const formattedPath = response.data.formatted_path;
+
+      // Filter out "Start" and "End" locations based on Items
+      const validShops = formattedPath.filter(
+        (entry) =>
+          !entry.Items.includes("Start") && !entry.Items.includes("End")
       );
 
-      intermediatePoints = filteredResponse.map((item) => ({
-        latitude: item.coordinates.Latitude,
-        longitude: item.coordinates.Longitude,
+      intermediatePoints = validShops.map((shop) => ({
+        latitude: shop.coordinates.Latitude,
+        longitude: shop.coordinates.Longitude,
+        shopName: shop.Shop,
+        items: shop.Items,
       }));
 
-      console.log(response.data);
-      console.log(intermediatePoints);
+      console.log("Intermediate Points:", intermediatePoints);
 
-      // Check if the login was successful
       if (response.status === 200) {
         givePathOverview(intermediatePoints);
       } else {
-        console.log(response.data);
+        console.log("Unexpected status:", response.status);
       }
     } catch (error) {
-      // Handle any network errors or exceptions
-      console.log(error);
-      console.log(error.stack);
-      console.log(error.message);
+      console.error("Route fetch error:", error.message);
     }
   };
 
@@ -144,11 +169,12 @@ export default function Dashboard({ navigation }) {
 
   const giveGoogleMapsPath = () => {
     const origin = location.coords;
-    const destination = {
-      // College
-      latitude: 18.46313753807985,
-      longitude: 73.83434475316888,
-    };
+    const destination = location.coords;
+    // const destination = {
+    //   // College
+    //   latitude: 18.46313753807985,
+    //   longitude: 73.83434475316888,
+    // };
 
     const originStr = `${origin.latitude},${origin.longitude}`;
     const destinationStr = `${origin.latitude},${origin.longitude}`;
@@ -254,7 +280,16 @@ export default function Dashboard({ navigation }) {
 
       {location ? (
         <View style={{ width: 300 }}>
-          <Button mode="outlined" bgcolor="#cce8dc">
+          <Button
+            mode="outlined"
+            bgcolor="#cce8dc"
+            onPress={async () => {
+              const plan = await getPlan();
+              if (plan) {
+                navigation.navigate("PlanScreen", { plan });
+              }
+            }}
+          >
             Shopping Plan
           </Button>
           <Button mode="outlined" bgcolor="#cce8dc" onPress={getRoute}>

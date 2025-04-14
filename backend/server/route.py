@@ -38,7 +38,9 @@ def create():
         file_path = os.path.join(output_folder, output_file)
         df.to_csv(file_path, index=False)
         
-        routes = tspOptimised.find_path_points(float(start_lat), float(start_lon))
-        print(routes)
-        return jsonify(routes)
+        formatted_path, shop_item_map = tspOptimised.find_path_points(float(start_lat), float(start_lon))
+
+        print("formatted_path", formatted_path)
+        print("shop_item_map", shop_item_map)
+        return jsonify({"shop_item_map": shop_item_map, "formatted_path": formatted_path}), 200
     

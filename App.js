@@ -13,6 +13,7 @@ import {
   MapView,
   ResetPasswordScreen,
   Dashboard,
+  PlanScreen,
 } from "./src/screens";
 
 const toastConfig = {
@@ -114,6 +115,7 @@ export default function App() {
           /> */}
               <Stack.Screen name="MapView" component={MapView} />
               <Stack.Screen name="Dashboard" component={Dashboard} />
+              <Stack.Screen name="PlanScreen" component={PlanScreen} />
               <Stack.Screen
                 name="ResetPasswordScreen"
                 component={ResetPasswordScreen}

@@ -2,6 +2,7 @@ from server.getDistance import utils
 import math
 import os
 from dotenv import load_dotenv
+from collections import defaultdict
 import pandas as pd
 
 
@@ -22,18 +23,66 @@ def find_path_points(start_lat, start_lon):
     print(total_dist)
     print(result)
     
-    formatted_best_path = []
+    # Track shops and associated info to avoid duplicates
+    shop_seen = set()
+    shop_items_map = defaultdict(list)
+    shop_coords_map = {}
+
     for coord, item, shop in result:
+        if shop == "Home":
+            continue
+        shop_seen.add(shop)
+        shop_items_map[shop].append(item)
+        shop_coords_map[shop] = coord  # This will store the last coord (or overwrite, doesn't matter since it's same shop)
+
+    formatted_best_path = []
+    for shop in shop_seen:
         formatted_coord = {
             "coordinates": {
-                "Latitude": coord[0],
-                "Longitude": coord[1]
+                "Latitude": shop_coords_map[shop][0],
+                "Longitude": shop_coords_map[shop][1]
             },
             "Shop": shop,
-            "Item": item
+            "Items": shop_items_map[shop]
         }
         formatted_best_path.append(formatted_coord)
-    return formatted_best_path
+        
+    # Add start and end back
+    formatted_best_path = [
+        {
+            "coordinates": {"Latitude": start_lat, "Longitude": start_lon},
+            "Shop": "Home",
+            "Items": ["Start"]
+        }
+    ] + formatted_best_path + [
+        {
+            "coordinates": {"Latitude": start_lat, "Longitude": start_lon},
+            "Shop": "Home",
+            "Items": ["End"]
+        }
+    ]
+
+    # Shop to items mapping with cost per unit
+    shop_item_map = {}
+    for entry in result:
+        coord, item, shop = entry
+        if shop == "Home":
+            continue
+        # Find cost from original shop list
+        matching_shop = next((s for s in shops if s['name'] == item and s['shops']['name'] == shop), None)
+        if not matching_shop:
+            continue
+        cost = matching_shop['price']
+
+        if shop not in shop_item_map:
+            shop_item_map[shop] = []
+
+        # Avoid duplicate entries for same item in same shop
+        if not any(existing['item'] == item for existing in shop_item_map[shop]):
+            shop_item_map[shop].append({"item": item, "cost": cost})
+
+    return formatted_best_path, shop_item_map
+
     
 def optimised_tsp_with_hieuristic(shops, items_to_visit, start_lat, start_lon, lst):
     
