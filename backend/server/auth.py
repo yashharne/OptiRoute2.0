@@ -58,27 +58,30 @@ def register():
 
 @bp.route('/login', methods=(['POST']))
 def login():
-        data=request.get_json()
-        print(data)
-        email = data.get('email')
-        password = data.get('password')
-        db = get_db()
-        error = None
+    data = request.get_json()
+    print(data)
+    email = data.get('email')
+    password = data.get('password')
+    db = get_db()
+    error = None
 
-        user = db.table("users").select('*').eq('email' , email).execute().data[0]
+    # Fetch user from the database based on email
+    users = db.table("users").select('*').eq('lower(email)', email).execute().data
+    print(f"Database query result: {users}")  # Log database query result
 
-        if user is None:
-            error = 'Incorrect email.'
-        elif not check_password_hash(user['password'], password):
+    if not users:  # Check if users list is empty
+        error = 'Incorrect email.'
+    else:
+        user = users[0]  # Get the first user if exists
+        if not check_password_hash(user['password'], password):
             error = 'Incorrect password.'
 
-        if error is None:
-            session.clear()
-            session['user_id'] = user['id']
-            return jsonify(user)
-        
-        return Response(error , status=401)
-
+    if error is None:
+        session.clear()
+        session['user_id'] = user['id']
+        return jsonify(user)
+    
+    return Response(error, status=401)
 
 
 

@@ -13,7 +13,7 @@ bp = Blueprint('route', __name__ , url_prefix='/route')
 
 
 @bp.route('/', methods=(['GET', 'POST']))
-@login_required
+# @login_required
 def create():
     # if request.method == 'POST':
         db = get_db()
@@ -23,8 +23,13 @@ def create():
         start_lat = data.get('start_lat')
         start_lon = data.get('start_lon')
 
-        res = db.table('items').select("item_id , shop_id ,name , price , quantity  , shops(id , Name , latitude , longitude)").filter('name' , 'in' , filter_string).execute()
-        
+        # print(filter_string)
+        res = db.table('items').select("item_id , shop_id ,name , price , quantity  , shops(id , name , latitude , longitude)").filter('name' , 'in' , filter_string).execute()
+        # print(res.data)
+
+        if not res.data:
+            return jsonify({"error": "No matching items found"}), 400
+
         df = pd.DataFrame(res.data)
         output_folder = "server/data"
         output_file = "data.csv"

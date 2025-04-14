@@ -7,8 +7,6 @@ from flask_cors import CORS
 import pandas as pd
 
 
-# def create_app(test_config=None):
-#     # create and configure the app
 app = Flask(__name__, instance_relative_config=True)
 CORS(app, resources={r"*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -21,7 +19,7 @@ from . import db
 db.init_app(app)
 
 from . import auth
-app.register_blueprint(auth.bp)
+app.register_blueprint(auth.bp, url_prefix='/auth')
 
 from . import route
 app.register_blueprint(route.bp)

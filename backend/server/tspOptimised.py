@@ -9,9 +9,13 @@ def find_path_points(start_lat, start_lon):
     df = pd.read_csv("server/data/data.csv")
 
     items_numppy = df['name'].unique()
-    items = items_numppy.tolist() + ["Home"]
+    # items = items_numppy.tolist() + ["Home"]
+    items = items_numppy.tolist()
+
+    print("Items", items)
 
     shops = utils.convert_to_dict(df.to_json(orient='records'), start_lat, start_lon)
+    print("Shops", shops)
     lst = len(shops)
     
     result, total_dist = optimised_tsp_with_hieuristic(shops, items, start_lat, start_lon, lst)
@@ -25,6 +29,7 @@ def find_path_points(start_lat, start_lon):
                 "Latitude": coord[0],
                 "Longitude": coord[1]
             },
+            "Shop": shop,
             "Item": item
         }
         formatted_best_path.append(formatted_coord)
@@ -64,7 +69,7 @@ def optimised_tsp_with_hieuristic(shops, items_to_visit, start_lat, start_lon, l
 
                 if dist + distance_travel < shortest_distance:
                     shortest_distance = dist + distance_travel
-                    best_path = [(shop_coords, item_name, shop['shops']['Name'])] + path
+                    best_path = [(shop_coords, item_name, shop['shops']['name'])] + path
 
         if shortest_distance < float('inf'):
             memo[(mask, last_shop_index)] = (shortest_distance, best_path)
@@ -75,5 +80,5 @@ def optimised_tsp_with_hieuristic(shops, items_to_visit, start_lat, start_lon, l
     memo = {}
     shortest_distance, shortest_path = dp(0, (start_lat, start_lon), 0)
     
-    shortest_path = [((start_lat, start_lon), "Start", "Home")] + shortest_path
+    shortest_path = [((start_lat, start_lon), "Start", "Home")] + shortest_path + [((start_lat, start_lon), "End", "Home")]
     return shortest_path, shortest_distance

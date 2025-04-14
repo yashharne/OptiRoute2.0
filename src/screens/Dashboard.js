@@ -8,8 +8,10 @@ import Paragraph from "../components/Paragraph";
 import Button from "../components/Button";
 import RNPickerSelect from "react-native-picker-select";
 import itemData from "../components/ItemData";
+import axios from "axios";
+import { apiUrl } from "../helpers/apiUrl";
 import { useToast } from "react-native-toast-notifications";
-import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
+import Toast from "react-native-toast-message";
 
 export default function Dashboard({ navigation }) {
   const [item, setItem] = useState("");
@@ -20,10 +22,7 @@ export default function Dashboard({ navigation }) {
 
   const toast = useToast();
 
-  const intermediatePoints = [
-    { latitude: 18.462479201186422, longitude: 73.83214922869587 }, // gaming cafe
-    { latitude: 18.465359165007385, longitude: 73.83478852247687 }, // polyhub
-  ];
+  let intermediatePoints = [];
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -34,8 +33,8 @@ export default function Dashboard({ navigation }) {
           return;
         }
 
-        let location = await Location.getCurrentPositionAsync({});
-        setLocation(location);
+        let loc = await Location.getCurrentPositionAsync({});
+        setLocation(loc);
         toast.show("Location is available!", {
           type: "custom",
           placement: "bottom",
@@ -90,18 +89,51 @@ export default function Dashboard({ navigation }) {
     setItemsList(updatedItems);
   };
 
+  const getRoute = async () => {
+    try {
+      // Send a POST request to the Flask API's login route
+      console.log(location);
+
+      const response = await axios.post(`${apiUrl}/route`, {
+        items: itemsList.map((item) => item.toLowerCase()),
+        start_lat: location.coords.latitude,
+        start_lon: location.coords.longitude,
+      });
+
+      const filteredResponse = response.data.filter(
+        (item) => item.Item !== "Start"
+      );
+
+      intermediatePoints = filteredResponse.map((item) => ({
+        latitude: item.coordinates.Latitude,
+        longitude: item.coordinates.Longitude,
+      }));
+
+      console.log(response.data);
+      console.log(intermediatePoints);
+
+      // Check if the login was successful
+      if (response.status === 200) {
+        givePathOverview(intermediatePoints);
+      } else {
+        console.log(response.data);
+      }
+    } catch (error) {
+      // Handle any network errors or exceptions
+      console.log(error);
+      console.log(error.stack);
+      console.log(error.message);
+    }
+  };
+
   const clearItems = () => {
     setItemsList([]);
     setClearList(true);
   };
 
-  const givePathOverview = () => {
+  const givePathOverview = (intermediatePoints) => {
     const origin = location.coords;
-    const destination = {
-      // College
-      latitude: 18.46313753807985,
-      longitude: 73.83434475316888,
-    };
+    const destination = origin;
 
     navigation.navigate("MapView", {
       origin,
@@ -119,7 +151,8 @@ export default function Dashboard({ navigation }) {
     };
 
     const originStr = `${origin.latitude},${origin.longitude}`;
-    const destinationStr = `${destination.latitude},${destination.longitude}`;
+    const destinationStr = `${origin.latitude},${origin.longitude}`;
+
     const waypointsStr = intermediatePoints
       .map((point) => `${point.latitude},${point.longitude}`)
       .join("|");
@@ -221,8 +254,11 @@ export default function Dashboard({ navigation }) {
 
       {location ? (
         <View style={{ width: 300 }}>
-          <Button mode="outlined" bgcolor="#cce8dc" onPress={givePathOverview}>
-            Get Path Overview
+          <Button mode="outlined" bgcolor="#cce8dc">
+            Shopping Plan
+          </Button>
+          <Button mode="outlined" bgcolor="#cce8dc" onPress={getRoute}>
+            Path Overview
           </Button>
           <Button
             mode="outlined"
