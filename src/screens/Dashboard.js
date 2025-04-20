@@ -7,6 +7,7 @@ import ItemListItem from "../components/ItemListItem";
 import Paragraph from "../components/Paragraph";
 import Button from "../components/Button";
 import RNPickerSelect from "react-native-picker-select";
+import DropDownPicker from "react-native-dropdown-picker";
 import itemData from "../components/ItemData";
 import axios from "axios";
 import { apiUrl } from "../helpers/apiUrl";
@@ -15,6 +16,7 @@ import Toast from "react-native-toast-message";
 
 export default function Dashboard({ navigation }) {
   const [item, setItem] = useState("");
+  const [open, setOpen] = useState(false);
   const [itemsList, setItemsList] = useState([]);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -235,30 +237,24 @@ export default function Dashboard({ navigation }) {
       <Header>Let’s start</Header>
       <Paragraph>Input items you want to buy!</Paragraph>
 
-      <RNPickerSelect
-        placeholder={{
-          label: "Select an item to add",
-          value: null,
-        }}
-        onValueChange={(value) => setSelectedItem(value)}
-        items={itemData}
+      <DropDownPicker
+        open={open}
         value={selectedItem}
+        items={itemData} // assuming itemData is structured properly
+        setOpen={setOpen}
+        setValue={setSelectedItem}
+        placeholder="Select an item"
+        containerStyle={{ height: 50 }} // Set the height for the dropdown
         style={{
-          inputIOS: {
-            textAlign: "center",
-            fontSize: 16,
-            color: "blue",
-            backgroundColor: "lightgray",
-          },
-          inputAndroid: {
-            textAlign: "center",
-            fontSize: 16,
-            color: "#4c4c4d",
-            backgroundColor: "lightgray",
-          },
-          placeholder: {
-            color: "gray",
-          },
+          backgroundColor: "lightgray", // background color for dropdown
+        }}
+        textStyle={{
+          textAlign: "center", // center text
+          fontSize: 16,
+          color: "black",
+        }}
+        placeholderStyle={{
+          color: "black", // placeholder text color
         }}
       />
 
