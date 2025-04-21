@@ -3,6 +3,8 @@
 # Ignore virtual environment
 venv/
 
+artifacts/
+
 # VS Code project files (includes Pylance cache and settings)
 .vscode/
 
